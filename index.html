@@ -29,11 +29,39 @@ body{display:flex;flex-direction:column;background:var(--paper);color:var(--ink)
 .batch-frame.active{display:block}
 .status{position:absolute;top:80px;left:50%;z-index:3;transform:translateX(-50%);padding:8px 12px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--muted);font-size:11px;box-shadow:0 4px 16px #19272012}
 .status[hidden]{display:none}
+#site-content{display:flex;flex:1;min-height:0;flex-direction:column}
+#site-content[hidden]{display:none!important}
+.password-gate{display:grid;min-height:100%;place-items:center;padding:24px;background:var(--paper)}
+.password-gate[hidden]{display:none}
+.password-panel{width:min(100%,380px);padding:28px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.password-brand{margin:0 0 8px;color:var(--teal);font-size:12px;font-weight:650}
+.password-panel h1{margin:0 0 22px;font-size:22px;font-weight:650}
+#password-form{display:grid;gap:10px}
+#password-form label{font-size:13px;color:var(--muted)}
+#site-password{width:100%;min-height:46px;padding:10px 12px;border:1px solid #bdcbc0;border-radius:5px;background:#fff;color:var(--ink);font:inherit;font-size:18px;letter-spacing:3px}
+#password-form button{min-height:46px;border:0;border-radius:5px;background:var(--teal);color:#fff;font:inherit;font-weight:650}
+#password-form button:hover{background:#105644}
+#password-error{margin:2px 0 0;color:#a44039;font-size:13px}
+#password-error[hidden]{display:none}
+@media(max-width:480px){.password-panel{padding:22px}}
 @media(max-width:760px){.topbar{align-items:flex-start;flex-wrap:wrap;gap:8px;padding:10px 13px 8px;min-height:0}.brand{font-size:12px}.brand-mark{width:31px;height:31px;font-size:12px}.nav-wrap{order:3;width:100%;flex-basis:100%;gap:8px}.nav-label{display:none}.batch-nav{width:100%}.batch-btn{padding:0 12px;min-height:42px;font-size:14px}.selected-label{margin-left:auto;padding-left:9px;font-size:9px}.batch-frame{flex:1;min-height:0}}
 @media(max-width:760px){.batch-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:6px;overflow:visible;padding:0;width:100%}.batch-btn{min-width:0;min-height:50px;padding:6px 5px;border-color:var(--line);font-size:13px;line-height:1.25;white-space:normal}}
 </style>
 </head>
 <body>
+<section id="password-gate" class="password-gate" aria-labelledby="password-title">
+  <div class="password-panel">
+    <p class="password-brand">深大801 · 数字电子技术</p>
+    <h1 id="password-title">请输入访问密码</h1>
+    <form id="password-form">
+      <label for="site-password">访问密码</label>
+      <input id="site-password" name="password" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="current-password" required>
+      <button type="submit">进入网站</button>
+      <p id="password-error" role="alert" hidden>密码不正确，请重试。</p>
+    </form>
+  </div>
+</section>
+<div id="site-content" hidden aria-hidden="true">
 <header class="topbar">
   <a class="brand" href="#batch-1" aria-label="返回数电第一批">
     <span class="brand-mark">801</span>
@@ -142,7 +170,7 @@ body{display:flex;flex-direction:column;background:var(--paper);color:var(--ink)
         activateCombinedBatch(Number(frame.dataset.selectedBatch));
       }
     });
-    document.body.insertBefore(frame,document.getElementById('app-data'));
+    document.getElementById('site-content').insertBefore(frame,document.getElementById('app-data'));
   }
   function activateCombinedBatch(batch){
     const frame=frames.get('digital36');
@@ -190,6 +218,31 @@ body{display:flex;flex-direction:column;background:var(--paper);color:var(--ink)
   });
   const initial=Number(location.hash.match(/^#batch-([1-6])$/)?.[1]||1);
   showBatch(initial);
+})();
+</script>
+</div>
+<script>
+(() => {
+  const key='szu801-course-gate-v1';
+  const gate=document.getElementById('password-gate');
+  const content=document.getElementById('site-content');
+  const form=document.getElementById('password-form');
+  const input=document.getElementById('site-password');
+  const error=document.getElementById('password-error');
+  const unlock=()=>{gate.hidden=true;content.hidden=false;content.removeAttribute('aria-hidden');};
+  try{if(sessionStorage.getItem(key)==='1')unlock();}catch{}
+  if(!gate.hidden)input.focus();
+  form.addEventListener('submit',event=>{
+    event.preventDefault();
+    if(input.value!=='2727'){
+      error.hidden=false;
+      input.value='';
+      input.focus();
+      return;
+    }
+    try{sessionStorage.setItem(key,'1');}catch{}
+    unlock();
+  });
 })();
 </script>
 </body>
